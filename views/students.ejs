@@ -1,0 +1,47 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <div>
+    <h1>Students</h1>
+    <div class="sub"><%= students.length %> shown<% if (show === 'due') { %> · ₹<%= u.money(students.reduce((a, s) => a + Math.max(0, s.pending), 0)) %> pending<% } %></div>
+  </div>
+  <a class="btn btn-primary" href="/students/new<%= batch ? '?batch=' + batch : '' %>">+ Add Student</a>
+</div>
+
+<form class="filters" method="get" action="/students">
+  <input type="search" name="q" value="<%= q %>" placeholder="Search name or phone">
+  <select name="batch" onchange="this.form.submit()">
+    <option value="">All classes</option>
+    <% batches.forEach(b => { %><option value="<%= b.id %>" <%= String(b.id) === String(batch) ? 'selected' : '' %>>Class <%= b.grade %>-<%= b.division %></option><% }) %>
+  </select>
+  <select name="show" onchange="this.form.submit()">
+    <option value="active" <%= show === 'active' ? 'selected' : '' %>>Active</option>
+    <option value="due" <%= show === 'due' ? 'selected' : '' %>>With dues</option>
+    <option value="inactive" <%= show === 'inactive' ? 'selected' : '' %>>Left</option>
+    <option value="all" <%= show === 'all' ? 'selected' : '' %>>All</option>
+  </select>
+  <button class="btn">Search</button>
+</form>
+
+<div class="card flush">
+  <% if (!students.length) { %>
+    <div class="empty">No students found. <a href="/students/new">Add a student</a></div>
+  <% } else { %>
+    <ul class="list">
+      <% students.forEach(s => { %>
+        <li><a class="list-item" href="/students/<%= s.id %>">
+          <div class="avatar"><%= s.name.split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase() %></div>
+          <div class="grow">
+            <div class="title"><%= s.name %></div>
+            <div class="meta">Class <%= s.grade %>-<%= s.division %><%= s.roll_no ? ' · Roll ' + s.roll_no : '' %><%= s.phone ? ' · ' + s.phone : '' %><%= s.active ? '' : ' · Left' %></div>
+          </div>
+          <div class="end">
+            <% if (s.pending > 0) { %><span class="pill bad num">₹<%= u.money(s.pending) %> due</span>
+            <% } else if (s.pending < 0) { %><span class="pill good num">₹<%= u.money(-s.pending) %> adv</span>
+            <% } else { %><span class="pill good">Paid</span><% } %>
+          </div>
+        </a></li>
+      <% }) %>
+    </ul>
+  <% } %>
+</div>
+<%- include('partials/footer') %>

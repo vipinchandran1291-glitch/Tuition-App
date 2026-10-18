@@ -1,0 +1,67 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <div>
+    <h1>Attendance</h1>
+    <div class="sub"><%= u.dateLabel(date) %><%= date === u.today() ? ' (today)' : '' %></div>
+  </div>
+  <a class="btn" href="/attendance/report">Monthly report</a>
+</div>
+
+<form class="filters" method="get" action="/attendance">
+  <% if (batch) { %><input type="hidden" name="batch" value="<%= batch.id %>"><% } %>
+  <input type="date" name="date" value="<%= date %>" max="<%= u.today() %>" onchange="this.form.submit()">
+</form>
+
+<% if (!batch) { %>
+  <div class="card">
+    <div class="card-head"><h2>Select a class</h2></div>
+    <div class="class-grid">
+      <% batches.forEach(b => { %>
+        <a class="class-tile <%= b.marked ? 'done' : '' %>" href="/attendance?batch=<%= b.id %>&date=<%= date %>">
+          <div class="name"><%= b.grade %>-<%= b.division %></div>
+          <div class="meta">
+            <% if (b.marked) { %><span class="text-good">✓ <%= b.present %>/<%= b.marked %> present</span>
+            <% } else { %><%= b.students %> students · not marked<% } %>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  </div>
+<% } else { %>
+  <form method="post" action="/attendance" class="card flush" id="att-form">
+    <input type="hidden" name="batch_id" value="<%= batch.id %>">
+    <input type="hidden" name="date" value="<%= date %>">
+    <div class="card-head">
+      <h2>Class <%= batch.grade %>-<%= batch.division %></h2>
+      <a href="/attendance?date=<%= date %>">All classes</a>
+    </div>
+    <p class="text-muted" style="margin: 4px 16px 8px; font-size: .85rem">
+      <%= batch.marked ? 'Already marked. Tap to change, then save.' : 'Everyone is marked present. Tap a student to mark them absent.' %>
+    </p>
+    <% if (!students.length) { %>
+      <div class="empty">No active students in this class. <a href="/students/new?batch=<%= batch.id %>">Add students</a></div>
+    <% } else { %>
+      <div>
+        <% students.forEach(s => { %>
+          <label class="att-row">
+            <input type="checkbox" name="present" value="<%= s.id %>" <%= s.present === 0 ? '' : 'checked' %>>
+            <div class="avatar"><%= s.roll_no || s.name[0].toUpperCase() %></div>
+            <div class="grow"><div style="font-weight: 600; color: var(--ink)"><%= s.name %></div></div>
+            <span class="att-toggle"></span>
+          </label>
+        <% }) %>
+      </div>
+      <div class="att-summary">
+        <div style="flex: 1; font-size: .9rem"><strong id="att-p" class="text-good">0</strong> present · <strong id="att-a" class="text-bad">0</strong> absent</div>
+        <button class="btn btn-primary">Save attendance</button>
+      </div>
+    <% } %>
+  </form>
+  <% if (batch.marked) { %>
+    <form method="post" action="/attendance/clear" style="margin-top: 12px; text-align: center" onsubmit="return confirm('Remove attendance for this class on this date?')">
+      <input type="hidden" name="batch_id" value="<%= batch.id %>"><input type="hidden" name="date" value="<%= date %>">
+      <button class="btn btn-sm btn-danger" style="border: 0; background: none">Clear this day (holiday / no class)</button>
+    </form>
+  <% } %>
+<% } %>
+<%- include('partials/footer') %>

@@ -1,0 +1,19 @@
+[Unit]
+Description=Tuition Manager
+After=network.target
+
+[Service]
+Type=simple
+User=tuition
+WorkingDirectory=/opt/tuition
+ExecStart=/usr/bin/node src/app.js
+Restart=always
+RestartSec=3
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=TZ=Asia/Kolkata
+Environment=COOKIE_SECURE=true
+Environment=DB_PATH=/opt/tuition/data/tuition.db
+
+[Install]
+WantedBy=multi-user.target

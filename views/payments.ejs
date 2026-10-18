@@ -1,0 +1,40 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <div>
+    <h1>Payments</h1>
+    <div class="sub"><%= payments.length %> payments · <strong class="num">₹<%= u.money(total) %></strong></div>
+  </div>
+  <a class="btn" href="/payments?from=<%= from %>&to=<%= to %>&mode=<%= mode %>&format=csv">Export CSV</a>
+</div>
+
+<form class="filters" method="get" action="/payments">
+  <div><label for="from">From</label><input id="from" type="date" name="from" value="<%= from %>"></div>
+  <div><label for="to">To</label><input id="to" type="date" name="to" value="<%= to %>"></div>
+  <div><label for="mode">Mode</label>
+    <select id="mode" name="mode">
+      <option value="">All modes</option>
+      <% modes.forEach(m => { %><option <%= m === mode ? 'selected' : '' %>><%= m %></option><% }) %>
+    </select>
+  </div>
+  <div style="flex: 0 0 auto; align-self: flex-end"><button class="btn">Apply</button></div>
+</form>
+
+<div class="card flush">
+  <% if (!payments.length) { %>
+    <div class="empty">No payments in this period.</div>
+  <% } else { %>
+    <ul class="list">
+      <% payments.forEach(p => { %>
+        <li class="list-item">
+          <a class="grow" href="/payments/<%= p.id %>" style="color: inherit">
+            <div class="title"><%= p.student_name %> <span class="text-muted" style="font-weight: 400">· <%= p.grade %>-<%= p.division %></span></div>
+            <div class="meta"><%= u.receiptNo(p) %> · <%= u.dateLabel(p.paid_on) %> · <%= p.mode %></div>
+          </a>
+          <div class="end num"><strong>₹<%= u.money(p.amount) %></strong></div>
+          <a class="btn btn-sm" href="/payments/<%= p.id %>/receipt.pdf" aria-label="Download PDF">PDF</a>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</div>
+<%- include('partials/footer') %>

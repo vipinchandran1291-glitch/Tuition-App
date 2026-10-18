@@ -1,0 +1,43 @@
+<%- include('partials/header') %>
+<div class="card" style="max-width: 560px; margin: 0 auto">
+  <div class="receipt-ok">
+    <% if (isNew) { %>
+      <div class="check"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></div>
+      <h2>Payment saved</h2>
+    <% } else { %>
+      <h2>Receipt <%= u.receiptNo(p) %></h2>
+    <% } %>
+    <div class="amt num">₹<%= u.money(p.amount) %></div>
+    <div class="text-muted"><%= u.amountInWords(p.amount) %></div>
+  </div>
+
+  <dl class="kv" style="margin-bottom: 18px">
+    <dt>Receipt no.</dt><dd><strong><%= u.receiptNo(p) %></strong></dd>
+    <dt>Student</dt><dd><a href="/students/<%= p.student_id %>"><%= p.student_name %></a> (<%= p.grade %>-<%= p.division %>)</dd>
+    <dt>Date</dt><dd><%= u.dateLabel(p.paid_on) %></dd>
+    <dt>Mode</dt><dd><%= p.mode %></dd>
+    <dt>Fee for</dt><dd><%= p.months_covered %></dd>
+    <% if (p.note) { %><dt>Note</dt><dd><%= p.note %></dd><% } %>
+    <dt>Balance</dt><dd class="<%= p.balance_after > 0 ? 'text-bad' : 'text-good' %>"><%= p.balance_after > 0 ? '₹' + u.money(p.balance_after) + ' due' : p.balance_after < 0 ? '₹' + u.money(-p.balance_after) + ' advance' : 'Nil' %></dd>
+  </dl>
+
+  <div class="stack">
+    <a class="btn btn-primary btn-lg" href="/payments/<%= p.id %>/receipt.pdf">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+      Download PDF receipt
+    </a>
+    <% if (p.phone) { %>
+      <a class="btn btn-wa btn-lg" href="<%= waLink %>" target="_blank" rel="noopener">Send on WhatsApp</a>
+    <% } %>
+    <div class="btn-row full">
+      <a class="btn" href="/collect">Collect another</a>
+      <a class="btn" href="/students/<%= p.student_id %>">View profile</a>
+    </div>
+  </div>
+
+  <form method="post" action="/payments/<%= p.id %>/delete" style="margin-top: 24px; text-align: center"
+        onsubmit="return confirm('Delete this payment? Use this only to fix a mistake.')">
+    <button class="btn btn-sm btn-danger" style="border: 0; background: none">Delete this payment</button>
+  </form>
+</div>
+<%- include('partials/footer') %>

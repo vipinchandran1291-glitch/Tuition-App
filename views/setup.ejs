@@ -1,0 +1,15 @@
+<%- include('partials/head') %>
+<body>
+<div class="auth">
+  <h1>Welcome</h1>
+  <p class="sub">Create the admin account to get started</p>
+  <form method="post" action="/setup" class="card">
+    <% if (error) { %><div class="flash err"><%= error %></div><% } %>
+    <div class="field"><label for="c">Tuition center name</label><input id="c" type="text" name="center_name" placeholder="e.g. Bright Future Academy" required></div>
+    <div class="field"><label for="u">Username</label><input id="u" type="text" name="username" autocapitalize="none" required></div>
+    <div class="field"><label for="p">Password</label><input id="p" type="password" name="password" minlength="6" autocomplete="new-password" required><div class="hint">At least 6 characters.</div></div>
+    <button class="btn btn-primary btn-lg">Create account</button>
+  </form>
+</div>
+</body>
+</html>

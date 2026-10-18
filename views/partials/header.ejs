@@ -1,0 +1,24 @@
+<%- include('head') %>
+<body>
+<%
+  const nav = [
+    { href: '/', label: 'Home', match: (p) => p === '/' },
+    { href: '/students', label: 'Students', match: (p) => p.startsWith('/students') },
+    { href: '/attendance', label: 'Attendance', match: (p) => p.startsWith('/attendance') },
+    { href: '/payments', label: 'Payments', match: (p) => p.startsWith('/payments') },
+    { href: '/more', label: 'More', match: (p) => p.startsWith('/more') },
+  ];
+%>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/"><%= settings.center_name %></a>
+    <nav class="topnav">
+      <% nav.forEach(n => { %>
+        <a href="<%= n.href %>" class="<%= n.match(path) ? 'active' : '' %>"><%= n.label %></a>
+      <% }) %>
+      <a class="btn btn-primary btn-sm" href="/collect">+ Collect Fee</a>
+    </nav>
+  </div>
+</header>
+<main>
+<% if (flash) { %><div class="flash <%= flash.type %>"><%= flash.msg %></div><% } %>

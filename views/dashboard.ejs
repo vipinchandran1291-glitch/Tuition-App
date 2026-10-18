@@ -1,0 +1,135 @@
+<%- include('partials/header') %>
+<%
+  const modeColor = { Cash: '#0f766e', UPI: '#6366f1', Bank: '#d97706' };
+  const modeTotal = modes.reduce((a, m) => a + m.total, 0);
+  const totalStudents = classes.reduce((a, c) => a + c.students, 0);
+  const marked = classes.filter(c => c.marked > 0).length;
+%>
+<div class="page-head">
+  <div>
+    <h1>Dashboard</h1>
+    <div class="sub"><%= u.dateLabel(u.today()) %> · <%= totalStudents %> active students</div>
+  </div>
+  <a class="btn btn-primary" href="/collect">+ Collect Fee</a>
+</div>
+
+<div class="stack">
+  <div class="grid grid-3">
+    <div class="card stat hero">
+      <div class="label">Collected in <%= monthName %></div>
+      <div class="value num">₹<%= u.money(monthStats.total) %></div>
+      <div class="meta"><%= monthStats.n %> payments</div>
+    </div>
+    <div class="card stat">
+      <div class="label">Collected today</div>
+      <div class="value num">₹<%= u.money(todayStats.total) %></div>
+      <div class="meta"><%= todayStats.n %> payments</div>
+    </div>
+    <div class="card stat">
+      <div class="label">Total pending</div>
+      <div class="value num <%= pending.total > 0 ? 'bad' : '' %>">₹<%= u.money(pending.total) %></div>
+      <div class="meta"><a href="/students?show=due"><%= pending.n %> students with dues →</a></div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-head"><h2>Collection, last 6 months</h2><a href="/payments">All payments</a></div>
+      <div class="bars" role="img" aria-label="Monthly collection for the last 6 months">
+        <% trend.forEach((t, i) => { %>
+          <div class="col <%= i === trend.length - 1 ? 'current' : '' %>" tabindex="0">
+            <span class="tip"><%= u.monthLabel(t.month) %>: ₹<%= u.money(t.total) %></span>
+            <div class="bar" style="height: <%= Math.max(1, Math.round(t.total / trendMax * 100)) %>%"></div>
+          </div>
+        <% }) %>
+      </div>
+      <div class="bars-x"><% trend.forEach(t => { %><span><%= t.label %></span><% }) %></div>
+      <table class="sr-only" style="position:absolute;left:-9999px">
+        <% trend.forEach(t => { %><tr><td><%= u.monthLabel(t.month) %></td><td><%= t.total %></td></tr><% }) %>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Payment modes, <%= monthName %></h2></div>
+      <% if (modeTotal === 0) { %>
+        <div class="empty">No payments this month yet.</div>
+      <% } else { %>
+        <div class="meter">
+          <% modes.forEach(m => { %><span style="width: <%= (m.total / modeTotal * 100).toFixed(1) %>%; background: <%= modeColor[m.mode] || '#8a93a3' %>" title="<%= m.mode %>: ₹<%= u.money(m.total) %>"></span><% }) %>
+        </div>
+        <div class="legend">
+          <% modes.forEach(m => { %>
+            <span><i style="background: <%= modeColor[m.mode] || '#8a93a3' %>"></i><%= m.mode %> <strong class="num">₹<%= u.money(m.total) %></strong> <span class="text-muted">(<%= m.n %>)</span></span>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <div class="card-head" style="margin-top: 20px"><h2>Recent payments</h2></div>
+      <% if (!recent.length) { %>
+        <div class="text-muted">No payments recorded yet.</div>
+      <% } else { %>
+        <ul class="list" style="margin: 0 -16px -16px">
+          <% recent.forEach(p => { %>
+            <li><a class="list-item" href="/payments/<%= p.id %>">
+              <div class="grow">
+                <div class="title"><%= p.student_name %></div>
+                <div class="meta"><%= p.grade %>-<%= p.division %> · <%= u.dateLabel(p.paid_on) %> · <%= p.mode %></div>
+              </div>
+              <div class="end num"><strong>₹<%= u.money(p.amount) %></strong></div>
+            </a></li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="card flush">
+    <div class="card-head"><h2>Class-wise summary</h2><span class="text-muted" style="font-size:.85rem">Attendance marked: <%= marked %>/<%= classes.length %> today</span></div>
+    <div class="table-wrap" style="margin-top: 12px">
+      <table>
+        <thead><tr><th>Class</th><th class="r">Students</th><th class="r hide-sm">Fee/mo</th><th class="r">Collected (<%= monthName.slice(0,3) %>)</th><th class="r">Pending</th><th class="r">Today</th></tr></thead>
+        <tbody>
+          <% classes.forEach(c => { %>
+            <tr>
+              <td><a href="/students?batch=<%= c.id %>"><strong><%= c.grade %>-<%= c.division %></strong></a></td>
+              <td class="r num"><%= c.students %></td>
+              <td class="r num hide-sm">₹<%= u.money(c.monthly_fee) %></td>
+              <td class="r num">₹<%= u.money(c.collected) %></td>
+              <td class="r num <%= c.pending > 0 ? 'text-bad' : '' %>">₹<%= u.money(c.pending) %></td>
+              <td class="r"><% if (c.marked) { %><span class="pill good"><%= c.present %>/<%= c.marked %></span><% } else if (c.students) { %><a class="pill muted" href="/attendance?batch=<%= c.id %>">Mark</a><% } else { %>–<% } %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+        <tfoot>
+          <tr><td>Total</td><td class="r num"><%= totalStudents %></td><td class="hide-sm"></td>
+            <td class="r num">₹<%= u.money(classes.reduce((a, c) => a + c.collected, 0)) %></td>
+            <td class="r num">₹<%= u.money(classes.reduce((a, c) => a + c.pending, 0)) %></td><td></td></tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="card flush">
+    <div class="card-head"><h2>Overdue (more than 1 month)</h2><a href="/students?show=due">View all dues</a></div>
+    <% if (!defaulters.length) { %>
+      <div class="empty">Nobody is overdue. 🎉</div>
+    <% } else { %>
+      <ul class="list" style="margin-top: 8px">
+        <% defaulters.forEach(d => { %>
+          <li class="list-item">
+            <a class="grow" href="/students/<%= d.id %>" style="color: inherit">
+              <div class="title"><%= d.name %></div>
+              <div class="meta"><%= d.grade %>-<%= d.division %> · ~<%= Math.ceil(d.pending / d.monthly_fee) %> months</div>
+            </a>
+            <div class="end num text-bad"><strong>₹<%= u.money(d.pending) %></strong></div>
+            <% if (d.phone) { %>
+              <a class="btn btn-sm" href="https://wa.me/<%= u.waPhone(d.phone) %>?text=<%= encodeURIComponent(`Dear Parent, the tuition fee of Rs. ${u.money(d.pending)} for ${d.name} (${d.grade}-${d.division}) is pending. Kindly pay at the earliest. - ${settings.center_name}`) %>" target="_blank" rel="noopener">Remind</a>
+            <% } %>
+            <a class="btn btn-sm btn-primary" href="/collect?student=<%= d.id %>">Collect</a>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/footer') %>

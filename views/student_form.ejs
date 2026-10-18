@@ -1,0 +1,53 @@
+<%- include('partials/header') %>
+<% const editing = !!student.id; %>
+<div class="page-head">
+  <h1><%= title %></h1>
+  <a class="btn" href="<%= editing ? '/students/' + student.id : '/students' %>">Cancel</a>
+</div>
+
+<form method="post" action="<%= editing ? '/students/' + student.id : '/students' %>" class="card" style="max-width: 640px">
+  <% if (error) { %><div class="flash err"><%= error %></div><% } %>
+  <div class="field">
+    <label for="name">Student name *</label>
+    <input id="name" type="text" name="name" value="<%= student.name || '' %>" required <%= editing ? '' : 'autofocus' %>>
+  </div>
+  <div class="grid grid-2">
+    <div class="field">
+      <label for="batch">Class *</label>
+      <select id="batch" name="batch_id" required>
+        <option value="">Select class</option>
+        <% batches.forEach(b => { %><option value="<%= b.id %>" <%= String(b.id) === String(student.batch_id) ? 'selected' : '' %>><%= b.grade %>-<%= b.division %> (₹<%= u.money(b.monthly_fee) %>/mo)</option><% }) %>
+      </select>
+    </div>
+    <div class="field">
+      <label for="roll">Roll no.</label>
+      <input id="roll" type="text" name="roll_no" value="<%= student.roll_no || '' %>" inputmode="numeric">
+    </div>
+    <div class="field">
+      <label for="parent">Parent name</label>
+      <input id="parent" type="text" name="parent_name" value="<%= student.parent_name || '' %>">
+    </div>
+    <div class="field">
+      <label for="phone">Parent phone (WhatsApp)</label>
+      <input id="phone" type="tel" name="phone" value="<%= student.phone || '' %>" inputmode="tel" placeholder="10-digit mobile">
+    </div>
+    <div class="field">
+      <label for="join">Join date</label>
+      <input id="join" type="date" name="join_date" value="<%= student.join_date %>">
+    </div>
+    <div class="field">
+      <label for="fs">Charge fees from month</label>
+      <input id="fs" type="month" name="fee_start" value="<%= student.fee_start %>">
+      <div class="hint">Monthly fee is added automatically from this month.</div>
+    </div>
+  </div>
+  <div class="field">
+    <label for="addr">Address</label>
+    <textarea id="addr" name="address"><%= student.address || '' %></textarea>
+  </div>
+  <div class="btn-row full">
+    <button class="btn btn-primary btn-lg"><%= editing ? 'Save changes' : 'Add student' %></button>
+    <% if (!editing) { %><button class="btn btn-lg" name="another" value="1">Save &amp; add another</button><% } %>
+  </div>
+</form>
+<%- include('partials/footer') %>

@@ -1,0 +1,47 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <div>
+    <h1>Attendance Report</h1>
+    <div class="sub">Class <%= batch.grade %>-<%= batch.division %> · <%= u.monthLabel(month) %> · <%= days.length %> class days</div>
+  </div>
+  <a class="btn no-print" href="/attendance">Mark attendance</a>
+</div>
+
+<form class="filters no-print" method="get" action="/attendance/report">
+  <select name="batch" onchange="this.form.submit()">
+    <% batches.forEach(b => { %><option value="<%= b.id %>" <%= b.id === batch.id ? 'selected' : '' %>>Class <%= b.grade %>-<%= b.division %></option><% }) %>
+  </select>
+  <select name="month" onchange="this.form.submit()">
+    <% months.forEach(m => { %><option value="<%= m %>" <%= m === month ? 'selected' : '' %>><%= u.monthLabel(m) %></option><% }) %>
+  </select>
+</form>
+
+<div class="card flush">
+  <% if (!rows.length) { %>
+    <div class="empty">No active students in this class.</div>
+  <% } else if (!days.length) { %>
+    <div class="empty">No attendance marked for this month.</div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table class="reg">
+        <thead>
+          <tr>
+            <th>Student</th><th class="r">Present</th><th class="r">%</th>
+            <% days.forEach(d => { %><th class="c"><%= Number(d.slice(8)) %></th><% }) %>
+          </tr>
+        </thead>
+        <tbody>
+          <% rows.forEach(r => { const p = r.total ? Math.round(r.present / r.total * 100) : null; %>
+            <tr>
+              <td><a href="/students/<%= r.id %>"><%= r.name %></a></td>
+              <td class="r num"><%= r.present %>/<%= r.total %></td>
+              <td class="r"><% if (p === null) { %>–<% } else { %><span class="pill <%= p >= 85 ? 'good' : p >= 70 ? 'warn' : 'bad' %>"><%= p %>%</span><% } %></td>
+              <% r.cells.forEach(c => { %><td class="c <%= c === 1 ? 'p' : c === 0 ? 'a' : '' %>"><%= c === 1 ? 'P' : c === 0 ? 'A' : '·' %></td><% }) %>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+<%- include('partials/footer') %>

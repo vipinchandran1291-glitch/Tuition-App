@@ -1,0 +1,51 @@
+<%- include('partials/header') %>
+<div class="page-head"><h1>More</h1></div>
+
+<div class="stack" style="max-width: 720px">
+  <div class="card flush">
+    <ul class="list">
+      <li><a class="list-item" href="/payments"><div class="grow"><div class="title">Payments</div><div class="meta">All fee collections, filter by date, export CSV</div></div>›</a></li>
+      <li><a class="list-item" href="/students?show=due"><div class="grow"><div class="title">Pending dues</div><div class="meta">Students who still owe fees</div></div>›</a></li>
+      <li><a class="list-item" href="/attendance/report"><div class="grow"><div class="title">Attendance report</div><div class="meta">Monthly register per class</div></div>›</a></li>
+    </ul>
+  </div>
+
+  <form class="card" method="post" action="/settings/fees">
+    <div class="card-head"><h2>Monthly fee per class</h2></div>
+    <div class="class-grid">
+      <% batches.forEach(b => { %>
+        <div class="field" style="margin: 0">
+          <label for="fee_<%= b.id %>">Class <%= b.grade %>-<%= b.division %></label>
+          <input id="fee_<%= b.id %>" type="number" name="fee_<%= b.id %>" value="<%= b.monthly_fee %>" min="1" inputmode="numeric">
+        </div>
+      <% }) %>
+    </div>
+    <label style="display: flex; gap: 8px; align-items: center; margin: 14px 0; font-weight: 500">
+      <input type="checkbox" name="apply_current" value="1"> Also apply to <%= u.monthLabel(u.currentMonth()) %> (already charged)
+    </label>
+    <div class="hint" style="margin-bottom: 12px">New fees always apply from next month. Past months are never changed.</div>
+    <button class="btn btn-primary">Save fees</button>
+  </form>
+
+  <form class="card" method="post" action="/settings/center">
+    <div class="card-head"><h2>Center details (shown on receipts)</h2></div>
+    <div class="field"><label for="cn">Name</label><input id="cn" type="text" name="center_name" value="<%= settings.center_name %>" required></div>
+    <div class="field"><label for="ca">Address</label><input id="ca" type="text" name="center_address" value="<%= settings.center_address %>"></div>
+    <div class="field"><label for="cp">Phone</label><input id="cp" type="tel" name="center_phone" value="<%= settings.center_phone %>"></div>
+    <button class="btn btn-primary">Save</button>
+  </form>
+
+  <form class="card" method="post" action="/settings/password">
+    <div class="card-head"><h2>Change password</h2><span class="text-muted">Signed in as <%= user.username %></span></div>
+    <div class="grid grid-2">
+      <div class="field"><label for="cur">Current password</label><input id="cur" type="password" name="current" autocomplete="current-password" required></div>
+      <div class="field"><label for="np">New password</label><input id="np" type="password" name="password" minlength="6" autocomplete="new-password" required></div>
+    </div>
+    <button class="btn">Change password</button>
+  </form>
+
+  <form method="post" action="/logout">
+    <button class="btn btn-lg btn-danger">Log out</button>
+  </form>
+</div>
+<%- include('partials/footer') %>

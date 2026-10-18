@@ -1,0 +1,14 @@
+<%- include('partials/head') %>
+<body>
+<div class="auth">
+  <h1><%= settings.center_name %></h1>
+  <p class="sub">Sign in to continue</p>
+  <form method="post" action="/login" class="card">
+    <% if (error) { %><div class="flash err"><%= error %></div><% } %>
+    <div class="field"><label for="u">Username</label><input id="u" type="text" name="username" autocomplete="username" autocapitalize="none" required autofocus></div>
+    <div class="field"><label for="p">Password</label><input id="p" type="password" name="password" autocomplete="current-password" required></div>
+    <button class="btn btn-primary btn-lg">Sign in</button>
+  </form>
+</div>
+</body>
+</html>
