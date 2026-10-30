@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "start": "node src/app.js",
-    "dev": "node --watch src/app.js",
+    "dev": "node --env-file=.env --watch src/app.js",
     "backup": "node scripts/backup.js"
   },
   "engines": {

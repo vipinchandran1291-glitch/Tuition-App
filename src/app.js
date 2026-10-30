@@ -44,6 +44,7 @@ app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   res.locals.flash = req.session.flash || null;
   res.locals.settings = getSettings();
+  res.locals.posthog = { key: process.env.POSTHOG_KEY, host: process.env.POSTHOG_HOST };
   req.session.flash = null;
   req.flash = (type, msg) => { req.session.flash = { type, msg }; };
   next();

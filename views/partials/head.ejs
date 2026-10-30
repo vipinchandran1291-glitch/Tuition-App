@@ -7,4 +7,20 @@
   <title><%= title %> · <%= settings.center_name %></title>
   <link rel="stylesheet" href="/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f766e'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='700'>T</text></svg>">
-</head>
+
+<% if (posthog.key) { %>
+<script src="https://us-assets.i.posthog.com/static/array.js"></script>
+<script>
+  posthog.init(<%- JSON.stringify(posthog.key) %>, {
+    api_host: <%- JSON.stringify(posthog.host) %>,
+    person_profiles: 'identified_only',
+    mask_all_text: true,
+    session_recording: { maskTextSelector: '*' }
+  });
+  <% if (user) { %>
+  posthog.identify(<%- JSON.stringify(user.username) %>);
+  <% } else { %>
+  posthog.reset();
+  <% } %>
+</script>
+<% } %></head>
